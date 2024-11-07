@@ -1,5 +1,5 @@
 pipeline {
-    agent {label 'java-slave-339accbd'}
+    agent { label 'java-slave-339accbd' }
 
     environment {
         // Set Docker Hub credentials
@@ -14,5 +14,8 @@ pipeline {
                 // Checkout the code from your repository
                 checkout scm
             }
+        }
+        // You can add more stages here, e.g., Build, Test, Deploy, etc.
     }
 }
+
