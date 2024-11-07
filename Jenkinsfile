@@ -15,7 +15,7 @@ pipeline {
                 checkout scm
             }
         }
-        // You can add more stages here, e.g., Build, Test, Deploy, etc.
+        
     }
 }
 
