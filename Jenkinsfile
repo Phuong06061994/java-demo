@@ -14,5 +14,5 @@ pipeline {
                 // Checkout the code from your repository
                 checkout scm
             }
-        }
+    }
 }
