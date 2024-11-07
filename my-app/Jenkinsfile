@@ -4,8 +4,7 @@ pipeline {
     environment {
         JAVA_HOME = tool name: 'JDK 17', type: 'JDK'
         MAVEN_HOME = tool name: 'Maven 3', type: 'Tool'
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials') // Jenkins credentials for Docker Hub login
-        IMAGE_NAME = 'yourdockerhubusername/your-image-name'  // Replace with your Docker Hub username and image name
+        IMAGE_NAME = 'phuong06061994/java-demo'  // Replace with your Docker Hub username and image name
         DOCKER_REGISTRY = 'docker.io'
     }
 
@@ -38,7 +37,7 @@ pipeline {
             steps {
                 script {
                     // Login to Docker Hub using Jenkins credentials
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentail', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
                     }
                 }
