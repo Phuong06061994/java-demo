@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent {label 'java-slave-fff10b55'}
 
     environment {
         JAVA_HOME = tool name: 'JDK 17', type: 'JDK'
