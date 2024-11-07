@@ -1,34 +1,28 @@
 pipeline {
-    agent {label 'java-slave-fff10b55'}
+    agent any
 
     environment {
-        JAVA_HOME = tool name: 'JDK 17', type: 'JDK'
-        MAVEN_HOME = tool name: 'Maven 3', type: 'Tool'
-        IMAGE_NAME = 'phuong06061994/java-demo'  // Replace with your Docker Hub username and image name
-        DOCKER_REGISTRY = 'docker.io'
+        // Set Docker Hub credentials
+        DOCKER_CREDENTIALS = 'dockerhub-credentail' // This is your Jenkins credentials ID
+        DOCKER_IMAGE_NAME = 'phuong06061994/java-demo'
+        IMAGE_TAG = "${env.BUILD_ID}"
     }
 
     stages {
         stage('Checkout') {
             steps {
+                // Checkout the code from your repository
                 checkout scm
-            }
-        }
-
-        stage('Build Java Project') {
-            steps {
-                script {
-                    // Run Maven clean and install to build the project
-                    sh "'${MAVEN_HOME}/bin/mvn' clean install"
-                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image using the Dockerfile in the repository
-                    sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} ."
+                    // Build the Docker image, specifying the 'my-app' directory as the context
+                    sh """
+                        docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} -f my-app/Dockerfile my-app
+                    """
                 }
             }
         }
@@ -36,9 +30,11 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    // Login to Docker Hub using Jenkins credentials
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentail', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+                    // Log in to Docker Hub using stored credentials
+                    withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh """
+                            echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin
+                        """
                     }
                 }
             }
@@ -48,16 +44,9 @@ pipeline {
             steps {
                 script {
                     // Push the Docker image to Docker Hub
-                    sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}"
-                }
-            }
-        }
-
-        stage('Cleanup') {
-            steps {
-                script {
-                    // Remove the Docker image after pushing to save space
-                    sh "docker rmi ${DOCKER_REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}"
+                    sh """
+                        docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                    """
                 }
             }
         }
@@ -65,7 +54,8 @@ pipeline {
 
     post {
         always {
-            cleanWs()  // Clean up the workspace after the build
+            // Clean up Docker images to avoid running out of space
+            sh "docker system prune -af"
         }
     }
 }
