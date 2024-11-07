@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent {label 'java-slave-8664637d'}
 
     environment {
         // Set Docker Hub credentials
