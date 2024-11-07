@@ -1,14 +1,26 @@
-# Use the official OpenJDK 17 image as the base
+FROM openjdk:17-jdk-slim AS build
+
+# Install Maven
+RUN apt-get update && apt-get install -y maven
+
+# Copy the necessary files
+COPY pom.xml mvnw ./
+COPY .mvn .mvn
+
+# Resolve dependencies
+RUN ./mvnw dependency:resolve
+
+# Copy source code
+COPY src src
+
+# Package the application
+RUN ./mvnw package
+
 FROM openjdk:17-jdk-slim
+WORKDIR /demo
 
-# Set the working directory inside the container
-WORKDIR /app
+# Copy the JAR file from the build stage
+COPY --from=build target/*.jar demo.jar
 
-# Copy the Maven project JAR file into the container (from target folder after Maven build)
-COPY target/*.jar app.jar
-
-# Expose the port the app runs on
-EXPOSE 8080
-
-# Command to run the app
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Run the JAR file
+ENTRYPOINT ["java", "-jar", "demo.jar"]
