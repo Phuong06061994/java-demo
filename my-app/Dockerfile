@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y maven
 COPY pom.xml mvnw ./
 COPY .mvn .mvn
 
+# Add executable permissions to mvnw
+RUN chmod +x mvnw
+
 # Resolve dependencies
 RUN ./mvnw dependency:resolve
 
