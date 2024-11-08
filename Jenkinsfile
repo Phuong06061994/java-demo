@@ -51,22 +51,7 @@ pipeline {
                 }
             }
         }
-
-        stage('SSH to Backend, Pull, and Run Image') {
-            steps {
-                script {
-                    // SSH into backend, pull the Docker image, and run it
-                    sh """
-                        ssh -o StrictHostKeyChecking=no -p $SSH_PORT root@$BACKEND_HOST << EOF
-                            docker pull ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
-                            docker run -d --name backend-container ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
-                        EOF
-                    """
-                }
-            }
-        }
-    }
-
+        
     post {
         always {
             // Clean up Docker images to avoid running out of space
