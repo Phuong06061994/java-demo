@@ -1,11 +1,12 @@
 pipeline {
-    agent {label 'java-slave-9e2eb893'}
+    agent { label 'java-slave' }
 
     environment {
-        // Set Docker Hub credentials
-        DOCKER_CREDENTIALS = 'git-hub-credential' // This is your Jenkins credentials ID
+        DOCKER_CREDENTIALS = 'git-hub-credential'
         DOCKER_IMAGE_NAME = 'phuong06061994/java-demo'
         IMAGE_TAG = "${env.BUILD_ID}"
+        BACKEND_HOST = "backend-app"  // Name of the backend container for SSH
+        SSH_PORT = "2222"  // SSH port for backend
     }
 
     stages {
@@ -15,16 +16,18 @@ pipeline {
                 checkout scm
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image, specifying the 'my-app' directory as the context
+                    // Build the Docker image, specifying the context
                     sh """
-                        docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} -f my-app/Dockerfile my-app
+                        docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} .
                     """
                 }
             }
         }
+
         stage('Login to Docker Hub') {
             steps {
                 script {
@@ -37,6 +40,7 @@ pipeline {
                 }
             }
         }
+
         stage('Push Docker Image') {
             steps {
                 script {
@@ -47,7 +51,22 @@ pipeline {
                 }
             }
         }
+
+        stage('SSH to Backend, Pull, and Run Image') {
+            steps {
+                script {
+                    // SSH into backend, pull the Docker image, and run it
+                    sh """
+                        ssh -o StrictHostKeyChecking=no -p $SSH_PORT root@$BACKEND_HOST << EOF
+                            docker pull ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                            docker run -d --name backend-container ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+                        EOF
+                    """
+                }
+            }
+        }
     }
+
     post {
         always {
             // Clean up Docker images to avoid running out of space
