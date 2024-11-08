@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'java-slave' }
+    agent { label 'java-slave-082dc27b' }
 
     environment {
         DOCKER_CREDENTIALS = 'git-hub-credential'
