@@ -29,9 +29,9 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image, specifying the 'my-app' directory as the context
-                    sh """
-                        docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} -f my-app/Dockerfile my-app
-                    """
+                    sh "docker builder prune -af"
+                    sh "docker build --no-cache -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} -f my-app/Dockerfile my-app"
+
                 }
             }
         }
