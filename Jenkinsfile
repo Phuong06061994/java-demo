@@ -15,6 +15,21 @@ pipeline {
                 checkout scm
             }
         }
+
+        stage('Set Image Tag') {
+                    steps {
+                        script {
+                            // Retrieve the short commit hash and assign it to IMAGE_TAG
+                            IMAGE_TAG  = sh(
+                                script: "git rev-parse --short=6 HEAD",
+                                returnStdout: true
+                            ).trim()
+
+                            echo "Image Tag: ${IMAGE_TAG}"
+                        }
+                    }
+                }
+
         stage('Build Docker Image') {
             steps {
                 script {
