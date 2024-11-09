@@ -1,10 +1,11 @@
 pipeline {
-    agent { label 'java-slave' }
+    agent {label 'java-slave'}
 
     environment {
         // Set Docker Hub credentials
         DOCKER_CREDENTIALS = 'dockerhub-credential' // This is your Jenkins credentials ID
         DOCKER_IMAGE_NAME = 'phuong06061994/java-demo'
+        IMAGE_TAG = "${env.BUILD_ID}"
     }
 
     stages {
@@ -12,17 +13,6 @@ pipeline {
             steps {
                 // Checkout the code from your repository
                 checkout scm
-            }
-        }
-        stage('Set Image Tag') {
-            steps {
-                script {
-                    // Retrieve the short commit hash and assign it to IMAGE_TAG
-                    env.IMAGE_TAG = sh(
-                        script: "git rev-parse --short=6 HEAD",
-                        returnStdout: true
-                    ).trim()
-                }
             }
         }
         stage('Build Docker Image') {
